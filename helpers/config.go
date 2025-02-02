@@ -28,6 +28,7 @@ func GetDBConnectionString() string {
 
 	if host == "" || port == "" || user == "" || dbname == "" {
 		slog.Error("Missing required environment variables for database connection")
+		slog.Info("Exiting application...")
 		os.Exit(1)
 	}
 

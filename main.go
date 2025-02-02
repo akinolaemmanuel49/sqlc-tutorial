@@ -54,68 +54,90 @@ func main() {
 	case *createFlag:
 		if *name == "" {
 			slog.Error("Name is required for creating an author")
+			slog.Info("Exiting application...")
 			os.Exit(1)
 		}
 		author, err := helpers.CreateAuthor(ctx, queries, *name, *bio)
 		if err != nil {
 			slog.Error("Failed to create author", "error", err)
+			slog.Info("Exiting application...")
 			os.Exit(1)
 		}
 		helpers.PrintAuthor(author)
+		slog.Info("Exiting application...")
 
 	case *readFlag:
 		if *id == 0 {
 			authors, err := helpers.ReadAuthors(ctx, queries)
 			if err != nil {
 				slog.Error("Failed to read author", "error", err)
+				slog.Info("Exiting application...")
 				os.Exit(1)
 			}
-			helpers.PrintAuthors(authors)
+			if authors == nil {
+				slog.Info("No authors present in the database")
+				slog.Info("Exiting application...")
+				os.Exit(1)
+			} else {
+				helpers.PrintAuthors(authors)
+				slog.Info("Exiting application...")
+			}
 		} else {
 			author, err := helpers.ReadAuthor(ctx, queries, *id)
 			if err != nil {
 				slog.Error("Failed to read author", "error", err)
+				slog.Info("Exiting application...")
 				os.Exit(1)
 			}
 			helpers.PrintAuthor(author)
+			slog.Info("Exiting application...")
 		}
 
 	case *updateFlag:
 		if *id == 0 {
 			slog.Error("Invalid ID", "id", *id)
+			slog.Info("Exiting application...")
 			os.Exit(1)
 		}
 		if *name != "" {
 			author, err := helpers.UpdateAuthorName(ctx, queries, *id, *name)
 			if err != nil {
 				slog.Error("Failed to update author name", "error", err)
+				slog.Info("Exiting application...")
 				os.Exit(1)
 			}
 			helpers.PrintAuthor(author)
+			slog.Info("Exiting application...")
 		}
 		if *bio != "" {
 			author, err := helpers.UpdateAuthorBio(ctx, queries, *id, *bio)
 			if err != nil {
 				slog.Error("Failed to update author bio", "error", err)
+				slog.Info("Exiting application...")
 				os.Exit(1)
 			}
 			helpers.PrintAuthor(author)
+			slog.Info("Exiting application...")
 		}
 
 	case *deleteFlag:
 		if *id == 0 {
 			slog.Error("Invalid ID", "id", *id)
+			slog.Info("Exiting application...")
 			os.Exit(1)
 		}
 		if err := helpers.DeleteAuthor(ctx, queries, *id); err != nil {
 			slog.Error("Failed to delete author", "error", err)
+			slog.Info("Exiting application...")
 			os.Exit(1)
 		}
 		fmt.Println("Author deleted successfully")
+		slog.Info("Exiting application...")
 
 	default:
 		fmt.Println("No valid flag is set. Usage:")
 		flag.PrintDefaults()
+		slog.Info("Exiting application...")
 	}
 }
 
@@ -127,8 +149,11 @@ func run(ctx context.Context, c chan<- *pgxpool.Pool) {
 	pgxPool, err := pgxpool.New(ctx, dbConnectionString)
 	if err != nil {
 		slog.Error("Failed to connect to database", "error", err)
+		slog.Info("Exiting application...")
 		os.Exit(1)
 	}
+
+	slog.Info("Successfully connected to the database")
 
 	// Send the connection instance through the channel
 	c <- pgxPool
